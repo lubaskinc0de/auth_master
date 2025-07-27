@@ -1,0 +1,44 @@
+services:
+  api:
+    build: .
+    expose:
+      - 3000
+    container_name: api
+
+  redis:
+    image: redis:7.0
+    container_name: redis
+    expose:
+      - 6379
+    volumes:
+      - redis_data:/data
+    command: ["redis-server", "--appendonly", "yes", "--save", "60", "10000"]
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 2s
+
+  oauth2-proxy:
+    container_name: oauth2-proxy
+    image: bitnami/oauth2-proxy:latest
+    command:
+      - --upstream=http://api:3000
+      - --reverse-proxy=false
+      - --cookie-httponly=true
+      - --request-logging=false
+      - --auth-logging=true
+      - --standard-logging=true
+      - --session-store-type=redis
+      - --redis-connection-url=redis://redis:6379/2
+      - --skip-provider-button
+    entrypoint:
+      - oauth2-proxy
+    env_file:
+      - .env.oauthproxy
+    ports:
+      - 8000:8000
+    depends_on:
+      redis:
+        condition: service_healthy
+
+volumes:
+  redis_data:
