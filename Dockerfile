@@ -10,8 +10,8 @@ RUN cargo build --release
 FROM debian:bookworm-slim
 
 WORKDIR /app
-COPY --from=builder /usr/src/app/target/release/timetowork /app/timetowork
+COPY --from=builder /usr/src/app/target/release/crudik_rs /app/crudik_rs
 
 ENV RUST_LOG=info
 
-CMD ["/app/timetowork"]
+CMD ["/app/crudik_rs"]
