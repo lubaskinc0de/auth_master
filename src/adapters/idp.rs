@@ -2,7 +2,7 @@ use crate::application::common::idp::IdProvider;
 
 #[derive(Clone)]
 pub(crate) struct ExternalIdProvider {
-    external_id: String
+    external_id: String,
 }
 
 impl ExternalIdProvider {
