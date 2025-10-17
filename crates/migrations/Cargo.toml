@@ -1,0 +1,15 @@
+[package]
+name = "migrations"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+description.workspace = true
+license.workspace = true
+resolver = "3"
+
+[dependencies]
+refinery = { version = "0.9.0", features = ["postgres"] }
+shared = { path = "../shared" }
+app_core = { path = "../app_core" }
+tokio = { version = "1.47.0", features = ["full"] }
+postgres = { version = "0.19.12" }

@@ -1,0 +1,13 @@
+[package]
+name = "shared"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+description.workspace = true
+license.workspace = true
+resolver = "3"
+
+[dependencies]
+diesel = { version = "2.1.0" }
+diesel-async = { version = "0.3.1", features = ["postgres", "deadpool"] }
+deadpool = "0.12.2"
