@@ -1,4 +1,3 @@
-/target
+target/
 .env
 .env.oauthproxy
-keycloak_data/
