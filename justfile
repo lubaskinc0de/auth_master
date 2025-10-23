@@ -1,6 +1,13 @@
 up:
     docker compose up --build
 
+infra:
+    docker compose up nginx oauth2-proxy redis postgres
+
+dev:
+    set -a && source "./.env" && set +a && cargo run -p migrations
+    set -a && source "./.env" && set +a && cargo run -p app_core
+
 down:
     docker compose down
 

@@ -24,3 +24,4 @@ froodi = { version = "1.0.0-beta.2", features = ["async", "axum"] }
 shared = { path = "../shared" }
 uuid = { version = "1.18.0", features = ["v4"]}
 validator = { version = "0.19", features = ["derive"] }
+chrono = "0.4.42"

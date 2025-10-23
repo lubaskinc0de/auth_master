@@ -10,4 +10,5 @@ fn main() {
     let config = config::from_env();
     let mut conn = Client::connect(&config.db.url, NoTls).unwrap();
     embedded::migrations::runner().run(&mut conn).unwrap();
+    println!("Migrations completed");
 }

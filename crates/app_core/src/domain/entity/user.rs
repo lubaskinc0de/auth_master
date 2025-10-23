@@ -1,3 +1,4 @@
+use chrono::{DateTime, Utc};
 use serde::Deserialize;
 use uuid::Uuid;
 
@@ -16,6 +17,7 @@ pub(crate) struct User {
     age: usize,
     gender: Gender,
     is_banned: bool,
+    created_at: DateTime<Utc>,
 }
 
 impl User {
@@ -37,6 +39,7 @@ impl User {
             last_name,
             gender,
             is_banned: false,
+            created_at: Utc::now(),
         }
     }
 }
