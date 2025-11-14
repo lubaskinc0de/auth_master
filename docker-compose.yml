@@ -9,6 +9,8 @@ services:
         depends_on:
             oauth2-proxy:
                 condition: service_healthy
+            api:
+                condition: service_healthy
         healthcheck:
             test: ["CMD", "curl", "-f", "http://localhost/health"]
             interval: 5s
@@ -87,7 +89,7 @@ services:
         expose:
             - 3000
         container_name: api
-        command: ["/app/main"]
+        command: ["/app/auth_service"]
         ports:
             - 3000:3000
         healthcheck:

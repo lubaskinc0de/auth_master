@@ -1,0 +1,33 @@
+[package]
+name = "auth_service"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+description.workspace = true
+license.workspace = true
+resolver = "3"
+
+[[bin]]
+name = "auth_service"
+path = "src/main.rs"
+
+[dependencies]
+axum = { version = "0.8.5", features = ["macros"] }
+serde = { version = "1.0.219", features = ["derive"] }
+serde_json = "1.0.108"
+tokio = { version = "1.47.0", features = ["full"] }
+tracing = "0.1"
+tracing-subscriber = { version = "0.3.19", features = ["fmt", "json"] }
+froodi = { version = "1.0.0-alpha.2", features = ["async", "axum"] }
+shared = { path = "../shared" }
+uuid = { version = "1.18.0", features = ["v4", "serde"] }
+validator = { version = "0.20", features = ["derive"] }
+chrono = "0.4.42"
+sea-query = { version = "1.0.0-rc.1", features = [
+    "backend-postgres",
+    "with-chrono",
+    "with-uuid",
+] }
+deadpool-postgres = "0.14.1"
+tokio-postgres = "0.7.15"
+axum-valid = "0.24.0"

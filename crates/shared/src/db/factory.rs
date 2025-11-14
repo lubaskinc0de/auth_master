@@ -1,23 +1,33 @@
+use deadpool_postgres::{Config, ManagerConfig, Object, Pool, RecyclingMethod, Runtime};
 use std::sync::Arc;
-
-use diesel_async::AsyncPgConnection;
-use diesel_async::pooled_connection::AsyncDieselConnectionManager;
-use diesel_async::pooled_connection::deadpool::{Object, Pool};
+use tokio_postgres::NoTls;
 
 #[derive(Clone)]
 pub struct DbConfig {
+    pub host: String,
+    pub port: u16,
+    pub db_name: String,
+    pub username: String,
+    pub password: String,
     pub url: String,
 }
 
-pub fn get_connection_pool(db_url: &str) -> Pool<AsyncPgConnection> {
-    let config = AsyncDieselConnectionManager::<diesel_async::AsyncPgConnection>::new(db_url);
-    let pool = Pool::builder(config)
-        .build()
-        .expect("Failed to create db pool");
-    pool
+pub fn get_connection_pool(config: &DbConfig) -> Pool {
+    let mut cfg = Config::new();
+    cfg.host = Some(config.host.clone());
+    cfg.port = Some(config.port);
+    cfg.dbname = Some(config.db_name.clone());
+    cfg.user = Some(config.username.clone());
+    cfg.port = Some(config.port);
+    cfg.password = Some(config.password.clone());
+
+    cfg.manager = Some(ManagerConfig {
+        recycling_method: RecyclingMethod::Fast,
+    });
+    cfg.create_pool(Some(Runtime::Tokio1), NoTls).unwrap()
 }
 
-pub async fn get_connection(pool: Arc<Pool<AsyncPgConnection>>) -> Object<AsyncPgConnection> {
-    let conn = pool.get().await.expect("Failed to get connection");
-    conn
+pub async fn get_connection(pool: Arc<Pool>) -> Object {
+    
+    pool.get().await.expect("Failed to get connection")
 }

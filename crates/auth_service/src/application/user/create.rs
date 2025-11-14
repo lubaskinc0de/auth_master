@@ -1,44 +1,36 @@
-use serde::Deserialize;
+use std::sync::Arc;
+
+use serde::{Deserialize, Serialize};
 
 use uuid::Uuid;
 use validator::Validate;
 
 use crate::{
     application::common::{gateway::user::UserGateway, id_generator::IdGenerator},
-    domain::entity::user::{Gender, User},
+    domain::entity::user::User,
 };
 
-#[derive(Debug, Validate, Deserialize)]
+#[derive(Validate, Deserialize)]
 pub(crate) struct CreateUserForm {
     #[validate(email)]
     email: String,
 
     #[validate(length(min = 1, max = 100))]
     username: String,
-
-    #[validate(length(min = 1, max = 100))]
-    first_name: String,
-
-    #[validate(length(min = 1, max = 100))]
-    last_name: String,
-
-    #[validate(range(min = 14, max = 99))]
-    age: usize,
-
-    gender: Gender,
 }
 
+#[derive(Serialize)]
 pub(crate) struct CreateUserResponse {
     pub user_id: Uuid,
 }
 
-pub(crate) struct CreateUserCommand<IdGen: IdGenerator, Gateway: UserGateway> {
-    id_generator: IdGen,
-    gateway: Gateway,
+pub(crate) struct CreateUserCommand<IdGen, Gateway> {
+    id_generator: Arc<IdGen>,
+    gateway: Arc<Gateway>,
 }
 
 impl<IdGen: IdGenerator, Gateway: UserGateway> CreateUserCommand<IdGen, Gateway> {
-    pub fn new(id_generator: IdGen, gateway: Gateway) -> Self {
+    pub fn new(id_generator: Arc<IdGen>, gateway: Arc<Gateway>) -> Self {
         Self {
             id_generator,
             gateway,
@@ -47,18 +39,9 @@ impl<IdGen: IdGenerator, Gateway: UserGateway> CreateUserCommand<IdGen, Gateway>
 
     pub async fn execute(&self, data: CreateUserForm) -> CreateUserResponse {
         let user_id = self.id_generator.generate();
-        let user = User::new(
-            user_id,
-            data.email,
-            data.username,
-            data.first_name,
-            data.age,
-            data.last_name,
-            data.gender,
-        );
+        let user = User::new(user_id, data.email, data.username);
 
         self.gateway.create(&user).await;
-
         CreateUserResponse { user_id }
     }
 }
