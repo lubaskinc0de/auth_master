@@ -1,7 +1,7 @@
 use sea_query::Iden;
 
 #[derive(Iden)]
-pub enum User {
+pub(crate) enum User {
     #[iden = "users"]
     Table,
     Id,

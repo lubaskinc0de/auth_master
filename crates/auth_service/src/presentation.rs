@@ -5,11 +5,11 @@ pub(crate) mod error_handler;
 pub(crate) mod user;
 
 #[derive(Serialize, Deserialize)]
-pub struct HealthResponse {
+pub(crate) struct HealthResponse {
     status: String,
 }
 
-pub async fn health_check() -> (StatusCode, Json<HealthResponse>) {
+pub(crate) async fn health_check() -> (StatusCode, Json<HealthResponse>) {
     let response = HealthResponse {
         status: "healthy".to_string(),
     };

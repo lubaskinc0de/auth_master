@@ -17,7 +17,7 @@ pub(crate) struct ExternalUserId {
 }
 
 impl ExternalUserId {
-    pub fn new(user_id: Uuid, external_id: String, source: ExternalIdSource) -> Self {
+    pub(crate) fn new(user_id: Uuid, external_id: String, source: ExternalIdSource) -> Self {
         Self {
             user_id,
             external_id,

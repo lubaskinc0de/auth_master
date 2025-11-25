@@ -3,7 +3,7 @@ use sea_query::{Iden, Value};
 use crate::entities::entity::external_user_id::ExternalIdSource;
 
 #[derive(Iden)]
-pub enum ExternalUserId {
+pub(crate) enum ExternalUserId {
     Table,
     UserId,
     ExternalId,

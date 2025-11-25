@@ -1,5 +1,5 @@
 pub(crate) mod di;
-pub mod external_auth_service;
+pub(crate) mod external_auth_service;
 pub(crate) mod gateway;
 pub(crate) mod id_gen;
 pub(crate) mod logging;

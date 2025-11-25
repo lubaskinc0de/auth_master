@@ -8,7 +8,7 @@ pub(crate) struct User {
 }
 
 impl User {
-    pub fn new(id: Uuid) -> Self {
+    pub(crate) fn new(id: Uuid) -> Self {
         Self {
             id,
             is_banned: false,
