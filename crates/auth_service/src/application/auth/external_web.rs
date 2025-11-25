@@ -54,7 +54,6 @@ impl<
 
     pub(crate) async fn execute(&self) -> Failable<AuthResponse, ExternalWebAuthError> {
         tracing::debug!("External web auth called");
-        self.tx_manager.begin().await?;
 
         let external_user_id_query = self.auth_service.get_external_id().await;
         let external_user_id_value = external_user_id_query.map_err(|e| match e {
@@ -86,11 +85,15 @@ impl<
                 return Ok(AuthResponse { user_id: user.id });
             } else {
                 tracing::warn!("User not found by external_user_id.user_id");
+                self.tx_manager.begin().await?;
                 let user = self.create_user(external_user_id_value).await?;
+                self.tx_manager.commit().await?;
                 return Ok(AuthResponse { user_id: user.id });
             }
         } else {
+            self.tx_manager.begin().await?;
             let user = self.create_user(external_user_id_value).await?;
+            self.tx_manager.commit().await?;
             Ok(AuthResponse { user_id: user.id })
         }
     }
@@ -101,7 +104,6 @@ impl<
 
         self.user_gateway.create(&user).await?;
         self.external_user_id_gateway.create(&external_id).await?;
-        self.tx_manager.commit().await?;
         tracing::info!("User created");
         Ok(user)
     }
