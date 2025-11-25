@@ -82,13 +82,13 @@ impl<
             tracing::debug!("Db external user id found");
             if let Some(user) = self.user_gateway.get(db_external_user_id.user_id).await? {
                 tracing::info!(user_id = %user.id, "User found");
-                return Ok(AuthResponse { user_id: user.id });
+                Ok(AuthResponse { user_id: user.id })
             } else {
                 tracing::warn!("User not found by external_user_id.user_id");
                 self.tx_manager.begin().await?;
                 let user = self.create_user(external_user_id_value).await?;
                 self.tx_manager.commit().await?;
-                return Ok(AuthResponse { user_id: user.id });
+                Ok(AuthResponse { user_id: user.id })
             }
         } else {
             self.tx_manager.begin().await?;

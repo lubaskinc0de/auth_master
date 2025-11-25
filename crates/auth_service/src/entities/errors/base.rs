@@ -50,8 +50,9 @@ pub(crate) enum ErrorKind<E> {
     Unexpected(#[from] anyhow::Error),
 }
 
-pub(crate) type VoidResult<E: AppError> = Result<(), ErrorKind<E>>;
-pub(crate) type Failable<T, E: AppError> = Result<T, ErrorKind<E>>;
+#[allow(dead_code)]
+pub(crate) type VoidResult<E> = Result<(), ErrorKind<E>>;
+pub(crate) type Failable<T, E> = Result<T, ErrorKind<E>>;
 pub(crate) type Infallible<T> = Result<T, ErrorKind<std::convert::Infallible>>;
 pub(crate) type InfallibleVoid = Result<(), ErrorKind<std::convert::Infallible>>;
 

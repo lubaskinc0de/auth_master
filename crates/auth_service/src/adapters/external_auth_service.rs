@@ -67,7 +67,7 @@ impl ExternalAuthService for OAuth2ProxyService {
                 let user_info =
                     unexpected_err!(serde_json::from_str::<UserInfoResponse>(&response_text));
                 tracing::info!(user_info = %user_info.user, "Oauth2-proxy authenticated user");
-                return Ok(user_info.user);
+                Ok(user_info.user)
             }
             StatusCode::UNAUTHORIZED => {
                 tracing::info!("Received UNAUTHORIZED response from oauth2-proxy");

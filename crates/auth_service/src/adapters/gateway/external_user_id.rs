@@ -59,17 +59,13 @@ impl ExternalUserIdGateway for SeaExternalUserIdGateway {
             .to_owned();
         let sql = q.to_string(PostgresQueryBuilder);
         Ok(
-            if let Some(result) = unexpected_err!(self.conn.query_opt(&sql, &[]).await) {
-                Some(entity::external_user_id::ExternalUserId {
+            unexpected_err!(self.conn.query_opt(&sql, &[]).await).map(|result| entity::external_user_id::ExternalUserId {
                     user_id: result.get(ExternalUserId::UserId.to_string().as_str()),
                     source: result
                         .get::<&str, ExternalIdSource>(ExternalUserId::Source.to_string().as_str()),
                     created_at: result.get(ExternalUserId::CreatedAt.to_string().as_str()),
                     external_id: result.get(ExternalUserId::ExternalId.to_string().as_str()),
-                })
-            } else {
-                None
-            },
+                }),
         )
     }
 }

@@ -1,5 +1,4 @@
 use sea_query::{Iden, Value};
-use tokio_postgres::types::FromSql;
 
 use crate::entities::entity::external_user_id::ExternalIdSource;
 
@@ -12,9 +11,9 @@ pub enum ExternalUserId {
     CreatedAt,
 }
 
-impl Into<Value> for ExternalIdSource {
-    fn into(self) -> Value {
-        Value::String(match self {
+impl From<ExternalIdSource> for Value {
+    fn from(val: ExternalIdSource) -> Self {
+        Value::String(match val {
             ExternalIdSource::Web => Some("WEB".to_string()),
         })
     }

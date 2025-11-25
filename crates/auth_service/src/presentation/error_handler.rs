@@ -34,18 +34,18 @@ impl<E: AppError + Into<StatusCode>> IntoResponse for ErrorKind<E> {
     }
 }
 
-impl Into<StatusCode> for CannotFetchUserInfoError {
-    fn into(self) -> StatusCode {
-        match &self {
+impl From<CannotFetchUserInfoError> for StatusCode {
+    fn from(val: CannotFetchUserInfoError) -> Self {
+        match &val {
             CannotFetchUserInfoError::Unauthorized => StatusCode::UNAUTHORIZED,
             CannotFetchUserInfoError::Unavailable => StatusCode::TOO_MANY_REQUESTS,
         }
     }
 }
 
-impl Into<StatusCode> for ExternalWebAuthError {
-    fn into(self) -> StatusCode {
-        match self {
+impl From<ExternalWebAuthError> for StatusCode {
+    fn from(val: ExternalWebAuthError) -> Self {
+        match val {
             ExternalWebAuthError::CannotFetchUserInfo(cannot_fetch_user_info_error) => {
                 cannot_fetch_user_info_error.into()
             }

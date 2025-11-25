@@ -13,6 +13,7 @@ use crate::{
 use thiserror::Error;
 
 #[derive(Error, Debug)]
+#[allow(clippy::enum_variant_names)]
 pub(crate) enum InvalidTransactionStateError {
     #[error("Transaction already commited.")]
     AlreadyCommited,
@@ -95,7 +96,7 @@ pub(crate) async fn finalize_tx_manager(dep: Arc<PgTxManager>) {
         return;
     }
 
-    if !(is_rollbacked || is_commited) && !is_begun {
+    if !(is_rollbacked || is_commited || is_begun) {
         tracing::warn!("Unused tx manager");
     }
     tracing::info!("Rollbacking transaction");

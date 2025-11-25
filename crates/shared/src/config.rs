@@ -33,11 +33,11 @@ pub struct Config {
 }
 
 fn get_env_var(key: &str) -> String {
-    env::var(&format!("{APP_PREFIX}_{key}")).unwrap_or_else(|_| panic!("{key} must be set"))
+    env::var(format!("{APP_PREFIX}_{key}")).unwrap_or_else(|_| panic!("{key} must be set"))
 }
 
 fn get_optional_env<T: ToString + FromStr>(key: &str, default: T) -> T {
-    env::var(&format!("{APP_PREFIX}_{key}"))
+    env::var(format!("{APP_PREFIX}_{key}"))
         .unwrap_or_else(|_| default.to_string())
         .parse()
         .unwrap_or(default)

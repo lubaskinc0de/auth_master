@@ -51,6 +51,6 @@ pub(crate) async fn external_web_auth<
             ErrorKind::Unexpected(_) => e.into_response(),
         }
     } else {
-        return res.into_response();
+        res.into_response()
     }
 }

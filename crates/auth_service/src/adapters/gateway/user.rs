@@ -45,15 +45,11 @@ impl UserGateway for SeaUserGateway {
             .to_owned();
         let sql = q.to_string(PostgresQueryBuilder);
         Ok(
-            if let Some(result) = unexpected_err!(self.conn.query_opt(&sql, &[]).await) {
-                Some(entity::user::User {
+            unexpected_err!(self.conn.query_opt(&sql, &[]).await).map(|result| entity::user::User {
                     id: result.get::<&str, Uuid>(User::Id.to_string().as_str()),
                     is_banned: result.get(User::IsBanned.to_string().as_str()),
                     created_at: result.get(User::CreatedAt.to_string().as_str()),
-                })
-            } else {
-                None
-            },
+                }),
         )
     }
 }
