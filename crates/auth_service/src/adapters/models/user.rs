@@ -1,11 +1,10 @@
 use sea_query::Iden;
 
 #[derive(Iden)]
-pub enum DbUser {
+pub enum User {
+    #[iden = "users"]
     Table,
     Id,
-    Email,
-    Username,
     IsBanned,
     CreatedAt,
 }

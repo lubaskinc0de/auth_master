@@ -28,6 +28,5 @@ pub fn get_connection_pool(config: &DbConfig) -> Pool {
 }
 
 pub async fn get_connection(pool: Arc<Pool>) -> Object {
-    
     pool.get().await.expect("Failed to get connection")
 }

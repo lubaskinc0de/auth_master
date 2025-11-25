@@ -1,6 +1,9 @@
 use axum::{http::StatusCode, response::Json};
 use serde::{Deserialize, Serialize};
 
+pub(crate) mod error_handler;
+pub(crate) mod user;
+
 #[derive(Serialize, Deserialize)]
 pub struct HealthResponse {
     status: String,

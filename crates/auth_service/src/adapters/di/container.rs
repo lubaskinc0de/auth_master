@@ -6,13 +6,21 @@ use crate::adapters::{
         adapters::create_adapters_registry, config::create_config_registry,
         interactor::create_interactor_registry,
     },
-    gateway::user::SeaUserGateway,
+    external_auth_service::OAuth2ProxyService,
+    gateway::{external_user_id::SeaExternalUserIdGateway, user::SeaUserGateway},
     id_gen::V4IdGenerator,
+    tx_manager::PgTxManager,
 };
 
 pub(crate) fn create_container(config: Config) -> Container {
     let config = create_config_registry(config);
     let adapters = create_adapters_registry();
-    let interactors = create_interactor_registry::<SeaUserGateway, V4IdGenerator>();
+    let interactors = create_interactor_registry::<
+        SeaUserGateway,
+        V4IdGenerator,
+        OAuth2ProxyService,
+        SeaExternalUserIdGateway,
+        PgTxManager,
+    >();
     Container::new(async_registry! { extend(adapters, interactors, config),  })
 }

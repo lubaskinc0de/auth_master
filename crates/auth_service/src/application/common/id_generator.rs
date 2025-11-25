@@ -1,5 +1,7 @@
 use uuid::Uuid;
 
-pub(crate) trait IdGenerator: Send + Sync + 'static {
+use crate::entities::shared::ThreadSafe;
+
+pub(crate) trait IdGenerator: ThreadSafe {
     fn generate(&self) -> Uuid;
 }

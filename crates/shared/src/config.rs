@@ -1,7 +1,9 @@
-use crate::db::factory::DbConfig;
-use std::env;
+use crate::{config::external_auth_service::ExternalAuthConfig, db::factory::DbConfig};
+use std::{env, str::FromStr, sync::Arc};
 
-const APP_PREFIX: &str = "APP";
+pub mod external_auth_service;
+
+const APP_PREFIX: &str = "AUTHMASTER";
 const DEFAULT_SERVER_PORT: usize = 3000;
 const DEFAULT_HEALTH_PATH: &str = "/health";
 const DEFAULT_HEALTH_ENABLED: bool = true;
@@ -18,60 +20,53 @@ pub struct HealthConfig {
 }
 
 #[derive(Clone)]
-pub struct CoreConfig {
+pub struct AuthServiceConfig {
     pub server: ServerConfig,
     pub health: HealthConfig,
 }
 
 #[derive(Clone)]
 pub struct Config {
-    pub core: CoreConfig,
-    pub db: DbConfig,
+    pub auth_service: Arc<AuthServiceConfig>,
+    pub db: Arc<DbConfig>,
+    pub external_auth: Arc<ExternalAuthConfig>,
 }
 
-fn var(name: &'static str) -> String {
-    format!("{APP_PREFIX}_{name}")
+fn get_env_var(key: &str) -> String {
+    env::var(&format!("{APP_PREFIX}_{key}")).unwrap_or_else(|_| panic!("{key} must be set"))
+}
+
+fn get_optional_env<T: ToString + FromStr>(key: &str, default: T) -> T {
+    env::var(&format!("{APP_PREFIX}_{key}"))
+        .unwrap_or_else(|_| default.to_string())
+        .parse()
+        .unwrap_or(default)
 }
 
 pub fn from_env() -> Config {
-    let server_port = env::var(var("SERVER_PORT"))
-        .unwrap_or_else(|_| DEFAULT_SERVER_PORT.to_string())
-        .parse::<usize>()
-        .unwrap();
-
-    let health_enabled = env::var(var("HEALTH_ENABLED"))
-        .unwrap_or_else(|_| "true".to_string())
-        .parse::<bool>()
-        .unwrap_or(DEFAULT_HEALTH_ENABLED);
-
-    let health_path =
-        env::var(var("HEALTH_PATH")).unwrap_or_else(|_| DEFAULT_HEALTH_PATH.to_string());
-
-    let db_host = env::var(var("DB_HOST")).expect("DB_HOST must be set");
-    let db_port = env::var(var("DB_PORT"))
-        .expect("DB_PORT must be set")
-        .parse::<u16>()
-        .expect("DB_PORT: expected integer");
-    let db_name = env::var(var("DB_NAME")).expect("DB_NAME must be set");
-    let db_user = env::var(var("DB_USER")).expect("DB_USER must be set");
-    let db_password = env::var(var("DB_PASSWORD")).expect("DB_PASSWORD must be set");
-    let db_url = env::var(var("DATABASE_URL")).expect("DATABASE_URL must be set");
-
     Config {
-        core: CoreConfig {
-            server: ServerConfig { server_port },
-            health: HealthConfig {
-                enabled: health_enabled,
-                path: health_path,
+        auth_service: Arc::new(AuthServiceConfig {
+            server: ServerConfig {
+                server_port: get_optional_env("SERVER_PORT", DEFAULT_SERVER_PORT),
             },
-        },
-        db: DbConfig {
-            host: db_host,
-            port: db_port,
-            db_name,
-            username: db_user,
-            password: db_password,
-            url: db_url,
-        },
+            health: HealthConfig {
+                enabled: get_optional_env("HEALTH_ENABLED", DEFAULT_HEALTH_ENABLED),
+                path: get_optional_env("HEALTH_PATH", DEFAULT_HEALTH_PATH.to_string()),
+            },
+        }),
+        db: Arc::new(DbConfig {
+            host: get_env_var("DB_HOST"),
+            port: get_env_var("DB_PORT")
+                .parse()
+                .expect("DB_PORT: expected integer"),
+            db_name: get_env_var("DB_NAME"),
+            username: get_env_var("DB_USER"),
+            password: get_env_var("DB_PASSWORD"),
+            url: get_env_var("DATABASE_URL"),
+        }),
+        external_auth: Arc::new(ExternalAuthConfig {
+            endpoint_userinfo: get_env_var("WEB_ENDPOINT_USERINFO"),
+            endpoint_sign_in: get_env_var("WEB_ENDPOINT_SIGN_IN"),
+        }),
     }
 }
