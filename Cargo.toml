@@ -6,5 +6,5 @@ resolver = "3"
 version = "0.1.0"
 edition = "2024"
 authors = ["lubaskinc0de structnull@yandex.ru"]
-description = "DreamTeams auth service"
+description = "Auth master tool"
 license = "MIT"
