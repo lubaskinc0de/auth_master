@@ -3,7 +3,6 @@ use std::sync::Arc;
 
 use deadpool_postgres::Object;
 use sea_query::{Expr, ExprTrait, Iden, PostgresQueryBuilder, Query};
-use uuid::Uuid;
 
 use crate::{
     adapters::models::user::User,
@@ -47,7 +46,7 @@ impl UserGateway for SeaUserGateway {
         Ok(
             unexpected_err!(self.conn.query_opt(&sql, &[]).await).map(|result| {
                 entity::user::User {
-                    id: result.get::<&str, Uuid>(User::Id.to_string().as_str()),
+                    id: result.get(User::Id.to_string().as_str()),
                     is_banned: result.get(User::IsBanned.to_string().as_str()),
                     created_at: result.get(User::CreatedAt.to_string().as_str()),
                 }

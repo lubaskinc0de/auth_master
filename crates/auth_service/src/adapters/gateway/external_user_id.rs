@@ -4,7 +4,7 @@ use crate::{
     adapters::models::external_user_id::ExternalUserId,
     application::common::gateway::external_user_id::ExternalUserIdGateway,
     entities::{
-        entity::{self, external_user_id::ExternalIdSource},
+        entity::{self},
         errors::base::{Infallible, InfallibleVoid},
         shared::ThreadSafe,
     },
@@ -62,8 +62,7 @@ impl ExternalUserIdGateway for SeaExternalUserIdGateway {
             unexpected_err!(self.conn.query_opt(&sql, &[]).await).map(|result| {
                 entity::external_user_id::ExternalUserId {
                     user_id: result.get(ExternalUserId::UserId.to_string().as_str()),
-                    source: result
-                        .get::<&str, ExternalIdSource>(ExternalUserId::Source.to_string().as_str()),
+                    source: result.get(ExternalUserId::Source.to_string().as_str()),
                     created_at: result.get(ExternalUserId::CreatedAt.to_string().as_str()),
                     external_id: result.get(ExternalUserId::ExternalId.to_string().as_str()),
                 }
