@@ -1,6 +1,6 @@
 # Auth Master
 
-**Universal Authentication Service with Multiple Identity Provider Support**
+**Universal authentication service with multiple identity provider support**
 
 Auth Master is a centralized authentication service that provides a unified interface for various authentication methods (OAuth2, Telegram, etc.) and maps external identities to internal users.
 
@@ -31,7 +31,7 @@ soon..
 
 ### Components
 
--   **NGINX**: Reverse proxy with `auth_request` module for authentication validation
+-   **NGINX**: Reverse proxy with `auth_request` module for auth handling
 -   **Auth Service**: Core Rust service that handles user mapping and authentication logic
 -   **OAuth2 Proxy**: Handles web OAuth2 flows (Google, GitHub, etc.)
 -   **PostgreSQL**: Primary database for user and identity storage
