@@ -60,7 +60,7 @@ Each service in your backend currently needs to:
 
 ### Infrastructure Setup
 
-<img  src="https://imgfy.ru/ib/sQbCMYkbOj3Hs4z_1764066718.png" alt="image.png"/>
+<img src="https://imgfy.ru/ib/sQbCMYkbOj3Hs4z_1764066718.png" alt="image.png"/>
 
 ### Configuration Example
 

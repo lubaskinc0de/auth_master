@@ -73,7 +73,6 @@ impl TxManager for PgTxManager {
         }
         unexpected_err!(self.conn.execute("ROLLBACK", &[]).await);
         self.is_rollbacked.store(true, Ordering::Relaxed);
-        tracing::debug!("Transaction rollbacked manually");
         Ok(())
     }
 }
@@ -98,10 +97,10 @@ pub(crate) async fn finalize_tx_manager(dep: Arc<PgTxManager>) {
 
     if !(is_rollbacked || is_commited || is_begun) {
         tracing::warn!("Unused tx manager");
+        return;
     }
     tracing::info!("Rollbacking transaction");
     dep.rollback().await.expect("Failed to rollback transation");
-    tracing::info!("Transaction rollbacked")
 }
 
 impl ThreadSafe for PgTxManager {}
