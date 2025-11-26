@@ -9,8 +9,8 @@ use crate::{
 };
 use axum::{
     Json,
-    http::StatusCode,
-    response::{IntoResponse, Redirect, Response},
+    http::{HeaderValue, StatusCode},
+    response::{IntoResponse, Response},
 };
 use froodi::{Inject, InjectTransient};
 use shared::config::external_auth_service::ExternalAuthConfig;
@@ -36,21 +36,35 @@ pub(crate) async fn external_web_auth<
     InjectTransient(config): InjectTransient<Arc<ExternalAuthConfig>>,
 ) -> Response {
     tracing::info!("GET /");
-    let res = interactor
-        .execute()
-        .await
-        .map(|result| (StatusCode::CREATED, Json(result).into_response()));
+    let res = interactor.execute().await;
+
     if let Err(e) = res {
         match &e {
             ErrorKind::Expected(err) => match &err {
                 ExternalWebAuthError::SignInRequired => {
-                    Redirect::to(&config.endpoint_sign_in).into_response()
+                    let mut resp = e.into_response();
+                    resp.headers_mut().insert(
+                        "WWW-Authenticate",
+                        HeaderValue::from_str(&config.endpoint_sign_in)
+                            .expect("Invalid header value"),
+                    );
+                    resp
                 }
                 _ => e.into_response(),
             },
             ErrorKind::Unexpected(_) => e.into_response(),
         }
+    } else if let Ok(auth_response) = res {
+        let mut resp = res
+            .map(|result| (StatusCode::CREATED, Json(result).into_response()))
+            .into_response();
+        resp.headers_mut().insert(
+            "X-Auth-User",
+            HeaderValue::from_str(&auth_response.user_id.to_string())
+                .expect("Invalid header value"),
+        );
+        resp
     } else {
-        res.into_response()
+        unreachable!()
     }
 }

@@ -2,3 +2,6 @@ target/
 .env.oauthproxy
 .env
 .venv/
+__pycache__/
+examples/real_world/build/
+real_world.egg-info

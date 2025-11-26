@@ -9,8 +9,10 @@ services:
         depends_on:
             oauth2-proxy:
                 condition: service_healthy
-            api:
+            auth_master:
                 condition: service_healthy
+            example_api:
+                condition: service_started
         healthcheck:
             test: ["CMD", "curl", "-f", "http://localhost/health"]
             interval: 5s
@@ -22,7 +24,7 @@ services:
         container_name: oauth2-proxy
         image: quay.io/oauth2-proxy/oauth2-proxy:v7.11.0-alpine
         command:
-            - --upstream=http://api:3000
+            - --upstream=http://nginx:80
             - --reverse-proxy=true
             - --cookie-httponly=true
             - --request-logging=true
@@ -44,7 +46,15 @@ services:
             redis:
                 condition: service_healthy
         healthcheck:
-            test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8000/ready"]
+            test:
+                [
+                    "CMD",
+                    "wget",
+                    "--no-verbose",
+                    "--tries=1",
+                    "--spider",
+                    "http://localhost:8000/ready",
+                ]
             interval: 5s
             timeout: 10s
             retries: 3
@@ -78,17 +88,17 @@ services:
         build: .
         container_name: migrations
         command: ["/app/migrations"]
-        env_file: 
+        env_file:
             - .env
         depends_on:
             postgres:
                 condition: service_healthy
 
-    api:
+    auth_master:
         build: .
         expose:
             - 3000
-        container_name: api
+        container_name: auth_master
         command: ["/app/auth_service"]
         ports:
             - 3000:3000
@@ -105,6 +115,16 @@ services:
                 condition: service_completed_successfully
             postgres:
                 condition: service_healthy
+
+    example_api:
+        build:
+            context: "./examples/real_world"
+            dockerfile: Dockerfile
+        expose:
+            - 8080
+        ports:
+            - 8080:8080
+        container_name: example_api
 
 volumes:
     redis_data:
