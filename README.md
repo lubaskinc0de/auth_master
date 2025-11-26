@@ -3,7 +3,7 @@
 > [!CAUTION]
 > This project is not ready for production, it is still in development.
 
-**Universal self-hosted blazingly fast authentication service written in Rust**
+**Universal self-hosted blazingly fast authentication service**
 
 Auth Master is a centralized authentication service that provides a unified interface for various authentication methods (OAuth2, Telegram, etc.) and maps external identities to internal users.
 
@@ -65,18 +65,73 @@ Each service in your backend currently needs to:
 ### Configuration Example
 
 **NGINX configuration:**
-soon...
+
+```conf
+events {
+    worker_connections 1024;
+}
+
+http {
+    upstream auth_master {
+        server auth_master:3000;
+    }
+
+    upstream oauth2_proxy {
+        server oauth2-proxy:8000;
+    }
+
+    upstream api {
+        server example_api:8080;
+    }
+
+    server {
+        listen 80;
+        server_name localhost;
+
+        location /oauth2/ {
+            proxy_pass http://oauth2_proxy;
+        }
+
+        location /health {
+            proxy_pass http://auth_master;
+        }
+
+        location / {
+            auth_request /auth;
+            auth_request_set $user $upstream_http_x_auth_user;
+            auth_request_set $redirect $upstream_http_www_authenticate;
+
+            proxy_pass http://api;
+            proxy_set_header X-Auth-User $user;
+            error_page 401 = @handle_auth_redirect;
+        }
+
+        location = /auth {
+            internal;
+            proxy_pass http://auth_master/;
+        }
+
+        location @handle_auth_redirect {
+            if ($redirect) {
+                return 302 $redirect;
+            }
+
+            return 401 '{"error": "Authentication required", "error_code": "UNAUTHORIZED""}';
+        }
+    }
+}
+```
 
 ### Client Integration Examples
 
 **Web Client Flow:**
 
-1. User visits `your-app.com`
+1. User visits `https://yourapp.com`
 2. NGINX checks authentication via Auth Master
 3. Auth Master detects `X-Client-Type: Web` and delegates to OAuth2 Proxy
 4. If not authenticated: 401 → redirect to OAuth2 sign-in
 5. If authenticated: OAuth2 Proxy provides user info → Auth Master maps to internal user ID
-6. NGINX forwards `X-Auth-User: internal-user-123` to backend services
+6. NGINX forwards `X-Auth-User: internal-user-123` to your backend services
 
 **Telegram Bot Flow:**
 
@@ -133,41 +188,7 @@ def get_current_user(request):
 
 soon..
 
-# Internal project structure
-
-## Architecture
-
-### Components
-
--   **NGINX**: Reverse proxy with `auth_request` module for auth handling
--   **Auth Service**: Core Rust service that handles user mapping and authentication logic
--   **OAuth2 Proxy**: Handles web OAuth2 flows (Google, GitHub, etc.)
--   **PostgreSQL**: Primary database for user and identity storage
--   **Redis**: Session storage for OAuth2 Proxy
-
-### Authentication Flow
-
-#### Web Authentication (via OAuth2-Proxy)
-
-```
-GET /auth/
-→ Auth Service calls OAuth2-Proxy userinfo endpoint
-← 401: Redirect to OAuth2 sign-in
-← 200: Extract external_user_id from headers
-→ Find/Create user with external_user_id (type: WEB)
-← Return user id
-```
-
-#### Telegram Authentication
-
-```
-GET /auth/
-→ Auth Service checks X-Telegram-Key signature
-← Invalid: 401 Unauthorized
-← Valid: Extract external_user_id from X-Telegram-Id
-→ Find/Create user with external_user_id (type: TELEGRAM_USER)
-← Return user id
-```
+# Contributing
 
 ## Prerequisites
 
@@ -205,9 +226,6 @@ AUTHMASTER_DB_PASSWORD=postgrespassword
 # External Auth Endpoints
 AUTHMASTER_WEB_ENDPOINT_USERINFO=http://oauth2-proxy:8000/oauth2/userinfo
 AUTHMASTER_WEB_ENDPOINT_SIGN_IN=http://localhost/oauth2/sign_in
-
-# Telegram Auth (future)
-AUTHMASTER_TELEGRAM_BOT_TOKEN=your_bot_token
 ```
 
 ### 2. Build and Run
@@ -217,30 +235,6 @@ just up
 ```
 
 The service will be available at `http://localhost`
-
-## Usage Examples
-
-### Protected API Call
-
-```bash
-# Web flow (handled by OAuth2-Proxy + Auth Service)
-curl -H "X-Client-Type: WEB" http://localhost/api/protected
-
-# Telegram flow
-curl -H "X-Client-Type: TELEGRAM" \
-     -H "X-Telegram-Id: 123456789" \
-     -H "X-Telegram-Key: verified_signature" \
-     http://localhost/api/protected
-```
-
-### Backend Services
-
-All backend services simply check the `X-Auth-User` header:
-
-```rust
-let user_id = headers.get("X-Auth-User")
-    .except("User not authenticated");
-```
 
 ## Just Commands
 
